@@ -1,0 +1,3 @@
+[submodule "rev_1"]
+	path = rev_1
+	url = https://github.com/sgdelia/softwareMiniProject
