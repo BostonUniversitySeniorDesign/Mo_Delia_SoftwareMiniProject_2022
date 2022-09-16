@@ -1,11 +1,4 @@
 {
-  "expo": {
-    "name": "rev_1",
-    "slug": "rev_1",
-    "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
-  },
-  "name": "rev_1"
+  "name": "AwesomeProject",
+  "displayName": "AwesomeProject"
 }
