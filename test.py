@@ -44,7 +44,7 @@ for page in search_results:
     # or alternatively, "flatten" results returning 1 tweet at a time, with expansions inline:
     for tweet in ensure_flattened(page):
         # Do something with the tweet
-        print(tweet)
+        print(tweet['text'])
 
     # Stop iteration prematurely, to only get 1 page of results.
     break
