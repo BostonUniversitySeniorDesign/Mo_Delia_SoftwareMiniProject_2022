@@ -1,0 +1,31 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+            $(document).ready(function() {
+                $(document).on('submit', '#search-bar', function() {
+                    // do your things
+                    // e.preventDefault()
+                    var id = $(this).attr('id');
+                    var query = $('input[name=query]').val()
+                    $.post("/form_post", {'id': id, 'query': query}, 
+                        function(){
+                        // $("#stop").html(response.result);
+                        // $("#title").html(response.feature);
+                        // if (response.calibrate == "stop") {
+                        //   $("#calibrate").attr("disabled", true);
+                        // } else if (response.calibrate == "start") {
+                        //   $("#calibrate").attr("disabled", false);
+                        // }
+                    });
+                    return false;
+                });
+            });
+        });
+</script>
+
+<form action="/" id="search-bar">
+    <div>
+        <input type="text" name="query" id="query">
+        <input type="submit" value="search" id="search">
+    </div>
+</form>
