@@ -12,58 +12,35 @@ from typing import Tuple, Optional
 from twarc.client2 import Twarc2
 from twarc.expansions import ensure_flattened
 
+from flask import Flask, request, render_template, jsonify
+
 def parser():
     # argument parser
     ap = argparse.ArgumentParser()
-    # ap.add_argument('-q', '--query', type=str,
-    #     required=True, help='user query')
-    # ap.add_argument('-n', '--num', type=int,
-    #     default=10, help='number of tweets to fetch')
     ap.add_argument('-e', '--env', type=str,
         default='.env', help='environment configuration file that contains \
         user keys for twitter api v2')
     args = ap.parse_args()
     return args
 
-# # Start and end times must be in UTC
-# # start_time = datetime.datetime(2021, 3, 21, 0, 0, 0, 0, datetime.timezone.utc)
-# # end_time = datetime.datetime(2021, 3, 22, 0, 0, 0, 0, datetime.timezone.utc)
-# start_time = None
-# end_time = None
-
-# # search_results is a generator, max_results is max tweets per page, 100 max for full archive search with all expansions.
-# search_results = t.search_recent(query=args.query, start_time=start_time, 
-#     end_time=end_time, max_results=args.num)
-
-# # Get all results page by page:
-# for page in search_results:
-#     # Do something with the whole page of results:
-#     # print(page)
-#     # or alternatively, "flatten" results returning 1 tweet at a time, with expansions inline:
-#     for tweet in ensure_flattened(page):
-#         # print tweet text
-#         print(tweet['text'])
-
-#     # Stop iteration prematurely, to only get 1 page of results.
-#     break
-
-from flask import Flask, request, render_template
-
+# flask instance
 app = Flask(__name__)
 
+# twarc instance placeholder
 t = None
 
 def run_results(search_results):
+    res = ''
     for page in search_results:
         # Do something with the whole page of results:
         # print(page)
         # or alternatively, "flatten" results returning 1 tweet at a time, with expansions inline:
         for tweet in ensure_flattened(page):
             # print tweet text
-            print(tweet['text'])
-
+            res = res + '\n' + tweet['text'] + '\n'
         # Stop iteration prematurely, to only get 1 page of results.
         break
+    return res
 
 @app.route('/')
 def my_form():
@@ -77,7 +54,9 @@ def form_post():
             if (query):
                 search_results = t.search_recent(query=query, start_time=None, 
                     end_time=None, max_results=10)
-                run_results(search_results)
+                res = run_results(search_results)
+                return jsonify(result=res)
+
 
     if (request.method == 'GET'):
         print('get')
