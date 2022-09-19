@@ -1,3 +1,4 @@
+from ast import arg
 import datetime
 import os
 import argparse
@@ -5,7 +6,17 @@ import argparse
 from twarc.client2 import Twarc2
 from twarc.expansions import ensure_flattened
 
-f = open('.env')
+ap = argparse.ArgumentParser()
+ap.add_argument('-q', '--query', type=str,
+    required=True, help='user query')
+ap.add_argument('-n', '--num', type=int,
+    default=10, help='number of tweets to fetch')
+ap.add_argument('-e', '--env', type=str,
+    default='.env', help='environment configuration file that contains \
+    user keys for twitter api v2')
+args = ap.parse_args()
+
+f = open(args.env)
 toks = [line.split('=')[1].strip('\n') for line in f]
 
 # Your bearer token here
@@ -23,7 +34,8 @@ start_time = None
 end_time = None
 
 # search_results is a generator, max_results is max tweets per page, 100 max for full archive search with all expansions.
-search_results = t.search_recent(query="dogs", start_time=start_time, end_time=end_time, max_results=10)
+search_results = t.search_recent(query=args.query, start_time=start_time, 
+    end_time=end_time, max_results=args.num)
 
 # Get all results page by page:
 for page in search_results:
