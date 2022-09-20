@@ -1,4 +1,5 @@
 import botometer
+from flask import Flask
 
 rapidapi_key = 'ef553c612emsh0aab3806e0dc54cp1fdb75jsn595045496df5'
 twitter_app_auth = {
