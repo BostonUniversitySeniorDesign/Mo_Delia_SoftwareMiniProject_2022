@@ -27,3 +27,11 @@ users_ref.set({
 })
 
 # should see above data at https://software-mini-project-a9313-default-rtdb.firebaseio.com/test
+
+# Retrieve the data, then print
+
+# Get a database reference to our posts
+ref = db.reference('test')
+
+# Read the data at the posts reference (this is a blocking operation)
+print(ref.get())
