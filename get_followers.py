@@ -45,7 +45,6 @@ if __name__ == "__main__":
     for id in ids:
         followed = t.following(id, max_results=args.num_users)
 
-
         for page in followed:
             # Do something with the whole page of results:
             # print(page)
@@ -58,3 +57,17 @@ if __name__ == "__main__":
             # Stop iteration prematurely, to only get 1 page of results.
             break
         
+    for username, id in user_ids.items():
+        timeline = t.timeline(id, max_results=args.num_tweets)
+
+        # print username
+        print("{}: ".format(username))
+
+        for page in timeline:
+            # Do something with the whole page of results:
+            # print(page)
+            for tweet in flatten(page):
+                print(tweet['text'])
+
+        # Stop iteration prematurely, to only get 1 page of results.
+        break
