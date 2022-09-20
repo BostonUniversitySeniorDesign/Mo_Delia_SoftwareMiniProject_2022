@@ -1,2 +1,5 @@
 .vscode
 *.env
+*.log
+*.jsonl
+users.txt
