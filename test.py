@@ -80,4 +80,5 @@ if __name__ == "__main__":
         toks[4], # access token secret
         toks[0]) # bearer token
 
+    # start flask app
     app.run(port=8000)
