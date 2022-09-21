@@ -14,7 +14,8 @@ def get_user_following_tweets(
     _twarc: Twarc2,
     num_following: int=10,
     num_tweets: int=10,
-    verbose: bool=False) -> dict:
+    verbose: bool=False
+    ) -> dict:
 
     # get requested user bios
     user_bio = _twarc.user_lookup(users,

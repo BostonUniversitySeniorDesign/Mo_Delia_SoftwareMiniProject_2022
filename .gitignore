@@ -4,3 +4,4 @@
 *.jsonl
 users.txt
 out.txt
+__pycache__/**

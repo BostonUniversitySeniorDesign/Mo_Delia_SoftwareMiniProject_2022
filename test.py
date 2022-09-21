@@ -13,6 +13,7 @@ from twarc.client2 import Twarc2
 from twarc.expansions import ensure_flattened
 
 from flask import Flask, request, render_template, jsonify
+from get_followers import get_user_following_tweets
 
 def parser():
     # argument parser
@@ -59,7 +60,8 @@ def form_post():
         if (request.form['id'] == 'user-search'):
             query = request.form['query']
             if (query):
-                return jsonify(result='hello world!\n')
+                user_ids = get_user_following_tweets([query], t, 10, 5)
+                return jsonify(result=str([key for key in user_ids[query]['following'].keys()]))
 
 
     if (request.method == 'GET'):
