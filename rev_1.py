@@ -98,13 +98,14 @@ firebase_admin.initialize_app(cred, {
 
 # Check account by screen name
 
+json_array = []
 for username in following_usernames:
     scores = analysis.check_account('@' + username)
     json_object = json.dumps(scores, indent = 4)
     # store scores in firebase
     ref = db.reference(user_investigated[0]) # only ever investigate one user
-    users_ref = ref.child('scores')
-    users_ref.set(json_object)
+    users_ref = ref.child(username + '-scores')
+    users_ref.set(json.loads(json_object))
 
 
 # Read in each tweet from a single account, run Natural Language API, store scores in Firebase (only averages?)
