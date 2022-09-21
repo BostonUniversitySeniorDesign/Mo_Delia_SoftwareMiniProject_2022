@@ -56,6 +56,10 @@ def form_post():
                     end_time=None, max_results=10)
                 res = run_results(search_results)
                 return jsonify(result=res)
+        if (request.form['id'] == 'user-search'):
+            query = request.form['query']
+            if (query):
+                return jsonify(result='hello world!\n')
 
 
     if (request.method == 'GET'):

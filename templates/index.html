@@ -3,10 +3,28 @@
         $(function() {
             $(document).ready(function() {
                 $(document).on('submit', '#search-bar', function() {
-                    // do your things
                     // e.preventDefault()
                     var id = $(this).attr('id');
                     var query = $('input[name=query]').val()
+                    $.post("/form_post", {'id': id, 'query': query}, 
+                        function(response){
+                        $('#results').html(response.result)
+                    });
+                    return false;
+                });
+            });
+        });
+</script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+            $(document).ready(function() {
+                $(document).on('submit', '#user-search', function() {
+                    // do your things
+                    // e.preventDefault()
+                    var id = $(this).attr('id');
+                    var query = $('input[name=query_user]').val()
                     $.post("/form_post", {'id': id, 'query': query}, 
                         function(response){
                         $('#results').html(response.result)
@@ -22,7 +40,13 @@
         <input type="text" name="query" id="query">
         <input type="submit" value="search" id="search">
     </div>
+</form>
+<form action="/" id="user-search">
     <div>
-        <textarea id="results" rows=30 cols=70></textarea>
+        <input type="text" name="query_user" id="query_user">
+        <input type="submit" value="user" id="search_user">
     </div>
 </form>
+<div>
+    <textarea id="results" rows=30 cols=70></textarea>
+</div>
