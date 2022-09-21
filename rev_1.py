@@ -37,37 +37,54 @@ ACCESS_TOKEN="1567967854271827970-qDLS7TZDu5EhWpIMPOz0hZfqiRhDV1"
 ACCESS_TOKEN_SECRET="fGuOMB9lOVybCtyxuMAGZ1eo86nt7hLFsvBj597O2jtKE"
 
 # Get ID of user
-users = ['sophiagdelia','supersoph_3'] # change to be variable input
+users = ['sophiagdelia'] # change to be variable input. can only see public accounts
 # client = Twarc2(consumer_key=consumer_key, consumer_secret=consumer_secret, access_token=access_token, access_token_secret=access_token_secret, bearer_token=bearer_token, connection_errors=0, metadata=True) 
 # parse configuration file
 
+
+# Twarc init, get list of IDs of accounts specified
 client = Twarc2(consumer_key = CONSUMER_KEY, consumer_secret = CONSUMER_SECRET, access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET)
 
 lookup = client.user_lookup(users, usernames=True, expansions=None, tweet_fields=None, user_fields=None)
+ids = []
 for gen_object in lookup: # generator object
     for users in gen_object['data']: # each user searched, don't need the twarc data
-        print(users['id'])
+        ids.append(users['id'])  # collect user IDs to see who everyone follows
+
+# Get list of accounts specified user follows. Print accounts just for gigs.
+accounts = []
+for id in ids:
+    following_gen_dict = client.following(id)
+    accounts.append(id)
+#print(accounts)
+data_array = []
+following = []
+
+for id in accounts:
+    data = client.following(id)
+    data_array.append(data)
     
+# print(data_array)
+clean_data = []
+for gen_object in data_array:
+    for user in gen_object:
+        clean_data.append(user['data'])
 
+following_usernames = []
+for accounts in clean_data:
+    for num_of_accounts in range(0,len(accounts)):
+        following_usernames.append(accounts[num_of_accounts]['username'])
 
-# # Twarc Init
-# def get_user_id():
-#     lookup = client.user_lookup(users, usernames=True, expansions=None, tweet_fields=None, user_fields=None)
-#     return lookup
-
-# # Get list of accounts specified user follows. Print accounts just for gigs.
-# # Get username(s) you want to look into. For now, local, eventually firebase. Can do up to 100.
-# def get_following(user_id):
-#     following_list = client.following(user_id)
-#     return following_list
-
-# def main():
-#     user_id_gen_obj = get_user_id()
-#     for user_id in user_id_gen_obj:
-#         print(*user_id) # unpack
-#     following = get_following(user_id)
-#     for user in following:
-#         print(*user)
+print(following_usernames)
+    #following.append(data['username'])
+#     # For each account specified
+#     for gen_object in following_gen_dict: # for each object of single account
+#         # print(gen_object)
+#         # print("\n")
+#         users_followed = []
+#         for users in gen_object['data']: # for each user followed
+#             users_followed.append(users['username'])
+# print(users_followed)
 
 # main()
 
