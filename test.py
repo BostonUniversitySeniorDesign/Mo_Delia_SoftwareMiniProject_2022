@@ -15,6 +15,8 @@ from twarc.expansions import ensure_flattened
 from flask import Flask, request, render_template, jsonify
 from get_followers import get_user_following_tweets
 
+import re, string
+
 def parser():
     # argument parser
     ap = argparse.ArgumentParser()
@@ -30,6 +32,8 @@ app = Flask(__name__)
 # twarc instance placeholder
 t = None
 
+pattern = re.compile('[\W_]+', re.UNICODE)
+
 def run_results(search_results):
     res = ''
     for page in search_results:
@@ -38,6 +42,7 @@ def run_results(search_results):
         # or alternatively, "flatten" results returning 1 tweet at a time, with expansions inline:
         for tweet in ensure_flattened(page):
             # print tweet text
+            # res = res + '\n' + re.sub('[\W_]+', ' ', tweet['text']) + '\n'
             res = res + '\n' + tweet['text'] + '\n'
         # Stop iteration prematurely, to only get 1 page of results.
         break
