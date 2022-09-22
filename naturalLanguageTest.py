@@ -46,5 +46,7 @@ def sample_analyze_sentiment(text_content):
     # the automatically-detected language.
     print(u"Language of the text: {}".format(response.language))
 
+    # TODO: return sentiment for given tweet
+
 if __name__ == "__main__":
     sample_analyze_sentiment("hello, my name is Soup")
