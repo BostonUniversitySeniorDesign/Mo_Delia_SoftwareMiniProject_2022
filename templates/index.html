@@ -1,4 +1,4 @@
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type=text/javascript>
         $(function() {
             $(document).ready(function() {
@@ -14,19 +14,21 @@
                 });
             });
         });
-</script>
+</script> -->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type=text/javascript>
         $(function() {
             $(document).ready(function() {
                 $(document).on('submit', '#user-search', function() {
-                    // do your things
-                    // e.preventDefault()
-                    var id = $(this).attr('id');
-                    var query = $('input[name=query_user]').val()
+                    var id = $(this).attr('id'); // get submission id
+                    var query = $('input[name=query_user]').val(); // get query string
+                    // TODO: disable form while POST request happening
+                    // POST id and query to flask web server
                     $.post("/form_post", {'id': id, 'query': query}, 
                         function(response){
+                        // TODO: enable form on server response
+                        // update response into textbox
                         $('#results').html(response.result)
                     });
                     return false;
@@ -35,12 +37,12 @@
         });
 </script>
 
-<form action="/" id="search-bar">
+<!-- <form action="/" id="search-bar">
     <div>
         <input type="text" name="query" id="query">
         <input type="submit" value="search" id="search">
     </div>
-</form>
+</form> -->
 <form action="/" id="user-search">
     <div>
         <input type="text" name="query_user" id="query_user">
