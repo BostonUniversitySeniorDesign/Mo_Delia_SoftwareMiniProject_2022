@@ -31,17 +31,43 @@ import requests
 import os
 import json
 
+# Google NLP example
 from naturalLanguageTest import sample_analyze_sentiment
 
-# make bearer token an environmental variable later
-BEARER_TOKEN="AAAAAAAAAAAAAAAAAAAAAPJ5gwEAAAAASl5uDiBWeiW5F6C1QDLisPvO0nY%3DtEKTLYqOILQVpFNn7zA6cpfG6q1rqoJixOoKgGelkoKzxtKcID"
-CONSUMER_KEY="rNYaIMBoelVLAJEJIh4DtZaQS" # API Key
-CONSUMER_SECRET="h4zsiN5O1XGzLWokMfphmN2yu3IjHK18LJ6dc7WVLbDnxa4xhY" # API Secret
-ACCESS_TOKEN="1567967854271827970-qDLS7TZDu5EhWpIMPOz0hZfqiRhDV1"
-ACCESS_TOKEN_SECRET="fGuOMB9lOVybCtyxuMAGZ1eo86nt7hLFsvBj597O2jtKE"
-credential_path = "C:/Users/sophi/Documents/Senior Design/service-account-file.json"
+ap = argparse.ArgumentParser()
+ap.add_argument('-p', '--port', type=int,
+    default=5000, help='web server port\
+    number')
+ap.add_argument('-i', '--ip', type=str,
+    default='localhost', help='web server ip')
+ap.add_argument('-fb', '--firebase_credentials', type=str,
+    default='software-mini-project-a9313-firebase-adminsdk-48pev-1e2967e8a1.json',
+    help='path to firebase credentials')
+ap.add_argument('-tw', '--twitter_credentials', type=str,
+    default='.env', help='path to file with twitter api v2 credentials')
+ap.add_argument('-rk', '--rapidapi_key', type=str,
+    default='.key', help='path to file with rapidapi key for botometer')
+args = ap.parse_args()
 
-rapidapi_key = 'ef553c612emsh0aab3806e0dc54cp1fdb75jsn595045496df5'
+# open user provided twitter credentials
+f = open(args.twitter_credentials)
+toks = [line.split('=')[1].strip('\n') for line in f]
+
+BEARER_TOKEN=toks[0]
+CONSUMER_KEY=toks[1] # API Key
+CONSUMER_SECRET=toks[2] # API Secret
+ACCESS_TOKEN=toks[3]
+ACCESS_TOKEN_SECRET=toks[4]
+
+f.close()
+
+# open user provided rapid api credentials
+f = open(args.rapidapi_key)
+
+rapidapi_key = [line.split('=')[1].strip('\n') for line in f][0]
+
+f.close()
+
 twitter_app_auth = {
     'consumer_key': CONSUMER_KEY,
     'consumer_secret': CONSUMER_SECRET,
@@ -58,7 +84,7 @@ analysis = botometer.Botometer(wait_on_ratelimit=True,
 app = Flask(__name__)
 
 # Fetch the service account key JSON file contents. Credential path will change depending on user. I need a .env file...
-cred = credentials.Certificate(credential_path)
+cred = credentials.Certificate(args.firebase_credentials)
 
 # Initialize the app with a service account, granting admin privileges
 firebase_admin.initialize_app(cred, {
@@ -113,7 +139,7 @@ def fetch_and_store_user_tweets(
         timeline = client.timeline(following_ids[i], max_results=num_tweets)
 
         # initialize dictionary to store into all outputs
-        tweets = {'username': following_usernames[i], 'sentiments': {}, 'botometer': scores}
+        tweets = {'sentiments': {}, 'botometer': scores}
         for gen_object in timeline: # generator object
             for tweet in gen_object['data']:
                 tweets['sentiments'][tweet['id']] = {'text': tweet['text']}
@@ -121,31 +147,20 @@ def fetch_and_store_user_tweets(
 
         outputs.append(tweets)
 
-    for output in outputs:
+    for (i, output) in enumerate(outputs):
         # go through each sentiment analysis field
         for id in output['sentiments'].keys():
             # perform sentiment analysis and store result into output dict
             output['sentiments'][id]['analysis'] = len(tweet['text'])
             # output['sentiments'][id]['analysis'] = sample_analyze_sentiment(tweet['text'])
 
-        # # create json object
-        # json_object = json.dumps(output, indent = 4)
+        # create json object
+        json_object = json.dumps(output, indent=4)
 
-        # # store scores in firebase
-        # ref = db.reference(user_investigated[0]) # only ever investigate one user
-        # users_ref = ref.child(username + '-scores')
-        # users_ref.set(json.loads(json_object))
-
-# argument parser
-def parser():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('-p', '--port', type=int,
-        default=5000, help='web server port\
-        number')
-    ap.add_argument('-i', '--ip', type=str,
-        default='localhost', help='web server ip')
-    args = ap.parse_args()
-    return args
+        # store scores in firebase
+        ref = db.reference(user_investigated[0]) # only ever investigate one user
+        users_ref = ref.child(following_usernames[i] + '-scores')
+        users_ref.set(json.loads(json_object))
 
 @app.route('/')
 def my_form():
@@ -167,9 +182,6 @@ def form_post():
 
 # main application code
 def main() -> None:
-    # get command line arguments
-    args = parser()
-
     # start flask application
     app.run(port=args.port, host=args.ip)
 

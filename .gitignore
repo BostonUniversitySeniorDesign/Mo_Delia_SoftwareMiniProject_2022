@@ -2,6 +2,8 @@
 *.env
 *.log
 *.jsonl
+*.key
+*.json
 users.txt
 out.txt
 __pycache__/**
