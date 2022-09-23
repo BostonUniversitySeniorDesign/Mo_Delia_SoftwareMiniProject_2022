@@ -21,6 +21,7 @@
         $(function() {
             $(document).ready(function() {
                 $(document).on('submit', '#user-search', function() {
+                    $(".search_user").attr("disabled", true); // disable form
                     var id = $(this).attr('id'); // get submission id
                     var query = $('input[name=query_user]').val(); // get query string
                     // TODO: disable form while POST request happening
@@ -28,8 +29,9 @@
                     $.post("/form_post", {'id': id, 'query': query}, 
                         function(response){
                         // TODO: enable form on server response
+                        $(".search_user").attr("disabled", false); // re-enable form
                         // update response into textbox
-                        $('#results').html(response.result)
+                        $('#results').html(response.result);
                     });
                     return false;
                 });
@@ -46,7 +48,7 @@
 <form action="/" id="user-search">
     <div>
         <input type="text" name="query_user" id="query_user">
-        <input type="submit" value="user" id="search_user">
+        <input type="submit" value="user" class="search_user">
     </div>
 </form>
 <div>

@@ -161,6 +161,7 @@ def form_post():
         if (request.form['id'] == 'user-search'):
             query = request.form['query']
             if (query):
+                print("requested")
                 data = fetch_and_store_user_tweets([query])
                 return jsonify(result=str(data))
 
