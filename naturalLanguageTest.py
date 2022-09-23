@@ -3,15 +3,13 @@ from google.cloud import language_v1
 
 # Credentials
 
-def sample_analyze_sentiment(text_content) -> list:
+def sample_analyze_sentiment(client, text_content) -> list:
     """
     Analyzing Sentiment in a String
 
     Args:
       text_content The text content to analyze
     """
-
-    client = language_v1.LanguageServiceClient()
 
     # text_content = 'I am so happy and joyful.'
 

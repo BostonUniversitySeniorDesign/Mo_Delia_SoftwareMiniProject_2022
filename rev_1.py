@@ -34,6 +34,10 @@ import json
 # Google NLP example
 from naturalLanguageTest import sample_analyze_sentiment
 
+# Google NLP API
+from google.auth import load_credentials_from_file
+from google.cloud import language_v1
+
 ap = argparse.ArgumentParser()
 ap.add_argument('-p', '--port', type=int,
     default=5000, help='web server port\
@@ -47,7 +51,16 @@ ap.add_argument('-tw', '--twitter_credentials', type=str,
     default='.env', help='path to file with twitter api v2 credentials')
 ap.add_argument('-rk', '--rapidapi_key', type=str,
     default='.key', help='path to file with rapidapi key for botometer')
+ap.add_argument('-go', '--google_credentials', type=str,
+    default='software-mini-project-a9313-921cf5b1ff7d.json',
+    help='path to google nlp api credentials')
 args = ap.parse_args()
+
+# set google credentials from provided file
+creds = load_credentials_from_file(args.google_credentials)
+
+# load google nlp client
+client = language_v1.LanguageServiceClient(credentials=creds)
 
 # open user provided twitter credentials
 f = open(args.twitter_credentials)
@@ -151,8 +164,8 @@ def fetch_and_store_user_tweets(
         # go through each sentiment analysis field
         for id in output['sentiments'].keys():
             # perform sentiment analysis and store result into output dict
-            output['sentiments'][id]['analysis'] = len(tweet['text'])
-            # output['sentiments'][id]['analysis'] = sample_analyze_sentiment(tweet['text'])
+            # output['sentiments'][id]['analysis'] = len(tweet['text'])
+            output['sentiments'][id]['analysis'] = sample_analyze_sentiment(client, tweet['text'])
 
         # create json object
         json_object = json.dumps(output, indent=4)
