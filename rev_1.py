@@ -57,13 +57,13 @@ ap.add_argument('-go', '--google_credentials', type=str,
 args = ap.parse_args()
 
 # set google credentials from provided file
-creds = load_credentials_from_file(args.google_credentials)
-
-# load google nlp client
-client = language_v1.LanguageServiceClient(credentials=creds)
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath(
+    args.google_credentials)
 
 # open user provided twitter credentials
 f = open(args.twitter_credentials)
+
+# get each credential
 toks = [line.split('=')[1].strip('\n') for line in f]
 
 BEARER_TOKEN=toks[0]
@@ -88,24 +88,11 @@ twitter_app_auth = {
     'access_token_secret': ACCESS_TOKEN_SECRET,
 }
 
-# initialize Botomer
-analysis = botometer.Botometer(wait_on_ratelimit=True,
-                          rapidapi_key=rapidapi_key,
-                          **twitter_app_auth)
-
 # intialize flask application
 app = Flask(__name__)
 
 # Fetch the service account key JSON file contents. Credential path will change depending on user. I need a .env file...
 cred = credentials.Certificate(args.firebase_credentials)
-
-# Initialize the app with a service account, granting admin privileges
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://software-mini-project-a9313-default-rtdb.firebaseio.com/'
-})
-
-# Twarc init, get list of IDs of accounts specified
-client = Twarc2(consumer_key = CONSUMER_KEY, consumer_secret = CONSUMER_SECRET, access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET)
 
 def fetch_and_store_user_tweets(
     user_investigated: List[str],
@@ -113,11 +100,33 @@ def fetch_and_store_user_tweets(
     num_tweets: int=10
     ) -> None:
 
+    # load google nlp client
+    nlp_client = language_v1.LanguageServiceClient()
+
+    # initialize Botomer
+    analysis = botometer.Botometer(wait_on_ratelimit=True,
+                          rapidapi_key=rapidapi_key,
+                          **twitter_app_auth)
+
+    # Initialize the app with a service account, granting admin privileges
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://software-mini-project-a9313-default-rtdb.firebaseio.com/'
+    })
+
+    # Twarc init, get list of IDs of accounts specified
+    client = Twarc2(consumer_key = CONSUMER_KEY, 
+        consumer_secret = CONSUMER_SECRET, 
+        access_token=ACCESS_TOKEN, 
+        access_token_secret=ACCESS_TOKEN_SECRET)
+
     lookup = client.user_lookup(user_investigated, usernames=True, expansions=None, tweet_fields=None, user_fields=None)
     ids = []
     for gen_object in lookup: # generator object
         for users in gen_object['data']: # each user searched, don't need the twarc data
             ids.append(users['id'])  # collect user IDs to see who everyone follows
+
+    # free memory
+    del lookup
 
     # Get list of accounts specified user follows. Clean data.
     accounts = []
@@ -142,6 +151,9 @@ def fetch_and_store_user_tweets(
             following_usernames.append(accounts[num_of_accounts]['username']) # can also grab ID, grabbing username for simplicity
             following_ids.append(accounts[num_of_accounts]['id'])
 
+    # free memory
+    del accounts, ids, data_array, clean_data
+
     # output array for following user data
     outputs = []
     for i in range(min(max_following, len(following_usernames))):
@@ -160,12 +172,15 @@ def fetch_and_store_user_tweets(
 
         outputs.append(tweets)
 
+    # free ids
+    del following_ids, analysis, client
+
     for (i, output) in enumerate(outputs):
         # go through each sentiment analysis field
         for id in output['sentiments'].keys():
             # perform sentiment analysis and store result into output dict
-            # output['sentiments'][id]['analysis'] = len(tweet['text'])
-            output['sentiments'][id]['analysis'] = sample_analyze_sentiment(client, tweet['text'])
+            #output['sentiments'][id]['analysis'] = len(tweet['text'])
+            output['sentiments'][id]['analysis'] = sample_analyze_sentiment(nlp_client, tweet['text'])
 
         # create json object
         json_object = json.dumps(output, indent=4)
@@ -196,7 +211,7 @@ def form_post():
 # main application code
 def main() -> None:
     # start flask application
-    app.run(port=args.port, host=args.ip)
+    app.run(port=args.port, host=args.ip, debug=True)
 
 if __name__ == "__main__":
     main()
