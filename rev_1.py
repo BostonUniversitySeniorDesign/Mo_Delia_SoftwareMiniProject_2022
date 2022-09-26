@@ -41,19 +41,18 @@ from google.cloud import language_v1
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-p', '--port', type=int,
-    default=5000, help='web server port\
-    number')
+    default=5000, help='web server port number')
 ap.add_argument('-i', '--ip', type=str,
     default='localhost', help='web server ip')
 ap.add_argument('-fb', '--firebase_credentials', type=str,
-    default='software-mini-project-a9313-firebase-adminsdk-48pev-1e2967e8a1.json',
+    default='firebase_admin_credentials.json',
     help='path to firebase credentials')
 ap.add_argument('-tw', '--twitter_credentials', type=str,
     default='.env', help='path to file with twitter api v2 credentials')
 ap.add_argument('-rk', '--rapidapi_key', type=str,
     default='.key', help='path to file with rapidapi key for botometer')
 ap.add_argument('-go', '--google_credentials', type=str,
-    default='software-mini-project-a9313-921cf5b1ff7d.json',
+    default='google_admin_credentials.json',
     help='path to google nlp api credentials')
 args = ap.parse_args()
 
@@ -98,7 +97,7 @@ cred = credentials.Certificate(args.firebase_credentials)
 def fetch_and_store_user_tweets(
     user_investigated: List[str],
     max_following: int=10,
-    num_tweets: int=10
+    num_tweets: int=10,
     ) -> None:
 
     # load google nlp client
@@ -122,6 +121,7 @@ def fetch_and_store_user_tweets(
 
     lookup = client.user_lookup(user_investigated, usernames=True, expansions=None, tweet_fields=None, user_fields=None)
     ids = []
+
     for gen_object in lookup: # generator object
         for users in gen_object['data']: # each user searched, don't need the twarc data
             ids.append(users['id'])  # collect user IDs to see who everyone follows
@@ -157,10 +157,13 @@ def fetch_and_store_user_tweets(
 
     # output array for following user data
     outputs = []
+    # PROBLEM STARTS HERE
+
+
     for i in range(min(max_following, len(following_usernames))):
         # run bot analysis on account
         scores = analysis.check_account('@' + following_usernames[i])
-
+       
         # get user tweets
         timeline = client.timeline(following_ids[i], max_results=num_tweets)
 
@@ -190,6 +193,7 @@ def fetch_and_store_user_tweets(
         ref = db.reference(user_investigated[0]) # only ever investigate one user
         users_ref = ref.child(following_usernames[i] + '-scores')
         users_ref.set(json.loads(json_object))
+        return json_object
 
 @app.route('/')
 def my_form():
@@ -201,8 +205,8 @@ def form_post():
         if (request.form['id'] == 'user-search'):
             query = request.form['query']
             if (query):
-                fetch_and_store_user_tweets([query])
-                return jsonify(result="done")
+                json_object = fetch_and_store_user_tweets([query])
+                return jsonify(result=json_object)
 
     if (request.method == 'GET'):
         print('get')
